@@ -18,12 +18,12 @@
     <rosparam file="$(find autorace_planning)/config/dwa_local_planner.yaml" command="load"/>
 
     <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
-
-    <!-- 센서 프레임 덮어쓰기 -->
     <param name="visioncloud/sensor_frame" value="$(arg sensor_frame)"/>
   </node>
 
-  <!-- Vision PoseStamped → move_base 표준 입력으로 릴레이 -->
-  <node pkg="topic_tools" type="relay" name="relay_vision_goal_to_simple"
-        args="$(arg vision_goal_topic) /move_base_simple/goal" />
+  <!-- goal을 3초에 1번만 전달(orbit 방지) -->
+  <node pkg="topic_tools" type="throttle" name="vision_goal_throttle"
+        args="messages $(arg vision_goal_topic) 0.33" />
+  <node pkg="topic_tools" type="relay" name="relay_goal"
+        args="/vision/goal_throttled /move_base_simple/goal" />
 </launch>

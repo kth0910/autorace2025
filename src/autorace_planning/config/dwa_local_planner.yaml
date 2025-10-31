@@ -1,23 +1,28 @@
 DWAPlannerROS:
-  acc_lim_x: 1.0
-  acc_lim_theta: 2.0
   max_vel_x: 0.6
-  min_vel_x: 0.0
-  max_vel_theta: 1.5
-  min_vel_theta: -1.5
-  yaw_goal_tolerance: 0.2
-  xy_goal_tolerance: 0.15
-  latch_xy_goal_tolerance: false
+  min_vel_x: 0.05
+  max_vel_theta: 1.0
+  min_in_place_vel_theta: 0.6
+
   sim_time: 2.0
   vx_samples: 10
   vtheta_samples: 20
-  path_distance_bias: 32.0
-  goal_distance_bias: 20.0
-  occdist_scale: 0.02
-  forward_point_distance: 0.5
-  stop_time_buffer: 0.2
-  prune_plan: true
+  sim_granularity: 0.025
 
-  # ↓↓↓ 시각화 토픽 출력 활성화 ↓↓↓
+  # 궤도 방지: 글로벌 플랜을 더 따르게
+  path_distance_bias: 48.0
+  goal_distance_bias: 16.0
+  occdist_scale: 0.02
+
+  heading_scoring: true
+  heading_scoring_timestep: 0.8
+
+  prefer_forward_sampling: true
+  penalize_negative_x: true
+
+  xy_goal_tolerance: 0.30
+  yaw_goal_tolerance: 0.35
+  latch_xy_goal_tolerance: true
+
   publish_traj_pc: true
   publish_cost_grid_pc: true

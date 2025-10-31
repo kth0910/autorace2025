@@ -1,5 +1,5 @@
-obstacle_range: 5.0
-raytrace_range: 6.0
+obstacle_range: 4.0
+raytrace_range: 5.0
 
 footprint: [[-0.18, -0.14], [-0.18, 0.14], [0.18, 0.14], [0.18, -0.14]]
 
@@ -12,5 +12,5 @@ visioncloud:
   clearing: true
   expected_update_rate: 0.2
 
-inflation_radius: 0.5
-cost_scaling_factor: 10.0
+inflation_radius: 0.35
+cost_scaling_factor: 5.0
