@@ -14,6 +14,9 @@
   <exec_depend>python3-opencv</exec_depend>
 
   <!-- ROS 메시지 의존성 -->
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+  
   <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
   <depend>geometry_msgs</depend>

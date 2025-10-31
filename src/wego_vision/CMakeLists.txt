@@ -16,10 +16,28 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   image_transport
   message_filters
+  message_generation
 )
 
 ## System dependencies
 find_package(OpenCV REQUIRED)
+
+################################################
+## Declare ROS messages, services and actions ##
+################################################
+
+## Generate messages in the 'msg' folder
+add_message_files(
+  FILES
+  LaneInfo.msg
+)
+
+## Generate added messages and services with any dependencies listed here
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -33,6 +51,7 @@ catkin_package(
     cv_bridge
     image_transport
     message_filters
+    message_runtime
 )
 
 ###########
@@ -54,6 +73,7 @@ catkin_install_python(PROGRAMS
   scripts/camera_node.py
   scripts/detection_node.py
   scripts/fusion_node.py
+  scripts/lane_detection_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
