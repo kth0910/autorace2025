@@ -76,6 +76,8 @@ catkin_install_python(PROGRAMS
   scripts/lane_detection_node.py
   scripts/lane_detection_edge_based.py
   scripts/lane_detection_hybrid.py
+  scripts/lane_detection_simple.py
+  scripts/simple_camera_publisher.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
