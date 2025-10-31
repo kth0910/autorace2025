@@ -2,7 +2,7 @@
 <package format="2">
   <name>autorace_planning</name>
   <version>0.0.1</version>
-  <description>Move_base planning configs and tools</description>
+  <description>Move_base planning via vision topics</description>
   <maintainer email="you@example.com">you</maintainer>
   <license>MIT</license>
 
@@ -13,6 +13,7 @@
   <depend>std_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>geometry_msgs</depend>
+  <depend>sensor_msgs</depend>
   <depend>tf</depend>
   <depend>move_base</depend>
   <depend>move_base_msgs</depend>

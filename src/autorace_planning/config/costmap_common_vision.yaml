@@ -1,0 +1,16 @@
+obstacle_range: 5.0
+raytrace_range: 6.0
+
+footprint: [[-0.18, -0.14], [-0.18, 0.14], [0.18, 0.14], [0.18, -0.14]]
+
+observation_sources: visioncloud
+visioncloud:
+  sensor_frame: camera_link
+  data_type: PointCloud2
+  topic: /vision/obstacles
+  marking: true
+  clearing: true
+  expected_update_rate: 0.2
+
+inflation_radius: 0.5
+cost_scaling_factor: 10.0

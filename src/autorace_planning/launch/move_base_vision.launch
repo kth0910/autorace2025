@@ -1,0 +1,29 @@
+<launch>
+  <arg name="vision_goal_topic"      default="/vision/goal"/>
+  <arg name="vision_cloud_topic"     default="/vision/obstacles"/>
+  <arg name="sensor_frame"           default="camera_link"/>
+  <arg name="use_laserscan"          default="false"/>
+  <arg name="vision_scan_topic"      default="/vision/scan"/>
+
+  <node pkg="move_base" type="move_base" name="move_base" output="screen">
+    <rosparam if="$(eval not arg('use_laserscan'))"
+              file="$(find autorace_planning)/config/costmap_common_vision.yaml"
+              command="load"/>
+    <rosparam if="$(arg use_laserscan)"
+              file="$(find autorace_planning)/config/costmap_common_vision_scan.yaml"
+              command="load"/>
+
+    <rosparam file="$(find autorace_planning)/config/global_costmap.yaml" command="load"/>
+    <rosparam file="$(find autorace_planning)/config/local_costmap.yaml"  command="load"/>
+    <rosparam file="$(find autorace_planning)/config/dwa_local_planner.yaml" command="load"/>
+
+    <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
+
+    <!-- 센서 프레임 덮어쓰기 -->
+    <param name="visioncloud/sensor_frame" value="$(arg sensor_frame)"/>
+  </node>
+
+  <!-- Vision PoseStamped → move_base 표준 입력으로 릴레이 -->
+  <node pkg="topic_tools" type="relay" name="relay_vision_goal_to_simple"
+        args="$(arg vision_goal_topic) /move_base_simple/goal" />
+</launch>
