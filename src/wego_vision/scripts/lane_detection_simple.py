@@ -30,8 +30,8 @@ class SimpleLaneDetectionNode:
         self.lane_info_topic = rospy.get_param('~lane_info_topic', '/vision/lane_info')
         self.debug_image_topic = rospy.get_param('~debug_image_topic', '/vision/lane_image')
         
-        # ROI - 하단 35%만 사용 ⭐
-        self.roi_top_ratio = rospy.get_param('~roi_top_ratio', 0.65)  # 65%부터 시작
+        # ROI - 하단 40%만 사용 ⭐
+        self.roi_top_ratio = rospy.get_param('~roi_top_ratio', 0.6)  # 60%부터 시작 (하단 40%)
         self.roi_bottom_ratio = rospy.get_param('~roi_bottom_ratio', 1.0)  # 100%까지
         
         # 색상 필터 (흰색 차선)
@@ -76,7 +76,7 @@ class SimpleLaneDetectionNode:
         self.image_sub = rospy.Subscriber(self.image_topic, Image, self.image_callback)
         
         rospy.loginfo("[Simple Lane Detection] 초기화 완료")
-        rospy.loginfo(f"  📐 ROI: 하단 35% (상단 {self.roi_top_ratio:.0%}부터)")
+        rospy.loginfo(f"  📐 ROI: 하단 40% (직사각형)")
         rospy.loginfo(f"  🎯 Edge + 흰색 검출 (가중치 {self.color_weight*100:.0f}%)")
     
     def image_callback(self, msg):
@@ -89,7 +89,7 @@ class SimpleLaneDetectionNode:
                 self.image_height, self.image_width = cv_image.shape[:2]
                 roi_height = int(self.image_height * (self.roi_bottom_ratio - self.roi_top_ratio))
                 rospy.loginfo(f"[Simple Lane] 이미지: {self.image_width}x{self.image_height}")
-                rospy.loginfo(f"[Simple Lane] ROI 높이: {roi_height}px (하단 35%)")
+                rospy.loginfo(f"[Simple Lane] ROI 높이: {roi_height}px (하단 40%, 직사각형)")
             
             # 차선 검출
             lane_info = self.detect_lanes(cv_image, msg.header)
@@ -180,19 +180,19 @@ class SimpleLaneDetectionNode:
         return lane_info
     
     def get_roi_mask(self, shape):
-        """ROI 마스크 (하단 35%)"""
+        """ROI 마스크 (하단 40% 직사각형)"""
         mask = np.zeros(shape[:2], dtype=np.uint8)
         
         height, width = shape[:2]
-        roi_top = int(height * self.roi_top_ratio)      # 65% 지점
+        roi_top = int(height * self.roi_top_ratio)      # 60% 지점
         roi_bottom = int(height * self.roi_bottom_ratio) # 100% 지점
         
-        # 사다리꼴 ROI (하단 35%)
+        # 직사각형 ROI (하단 40% 전체) ⭐
         vertices = np.array([[
-            (0, roi_bottom),
-            (int(width * 0.2), roi_top),      # 좌측 상단
-            (int(width * 0.8), roi_top),      # 우측 상단
-            (width, roi_bottom)
+            (0, roi_top),           # 좌측 상단
+            (width, roi_top),       # 우측 상단
+            (width, roi_bottom),    # 우측 하단
+            (0, roi_bottom)         # 좌측 하단
         ]], dtype=np.int32)
         
         cv2.fillPoly(mask, vertices, 255)
@@ -248,32 +248,35 @@ class SimpleLaneDetectionNode:
         return float(offset_meters)
     
     def draw_lanes(self, image, lane_info):
-        """차선 그리기 (단순 버전)"""
+        """차선 그리기 - Edge 표시"""
         output = image.copy()
         
-        # ROI 영역 표시 (반투명)
+        # ROI 영역 표시 (반투명 녹색)
         roi_mask = self.get_roi_mask(image.shape)
         roi_overlay = np.zeros_like(output)
         roi_overlay[roi_mask > 0] = [0, 100, 0]  # 녹색
         cv2.addWeighted(roi_overlay, 0.2, output, 1.0, 0, output)
         
-        # ROI 경계선
+        # ROI 경계선 (노란색 굵은 선)
         height, width = image.shape[:2]
         roi_top = int(height * self.roi_top_ratio)
-        roi_bottom = int(height * self.roi_bottom_ratio)
-        cv2.line(output, (0, roi_top), (width, roi_top), (0, 255, 255), 2)  # 노란색 선
+        cv2.line(output, (0, roi_top), (width, roi_top), (0, 255, 255), 3)  # 노란색 선
         
-        # 차선 포인트들 그리기 (빨간색)
-        if lane_info.center_lane_points:
-            for point in lane_info.center_lane_points:
-                cx, cy = int(point.x), int(point.y)
-                cv2.circle(output, (cx, cy), 5, (0, 0, 255), -1)  # 빨간 점
+        # Edge 검출 결과를 원본에 오버레이 ⭐
+        if lane_info.left_lane_detected:  # "차선 있음" 의미
+            # Edge 재계산
+            edge_mask = self.detect_edges(image, roi_mask)
+            
+            # Edge를 빨간색으로 표시
+            edge_overlay = np.zeros_like(output)
+            edge_overlay[edge_mask > 0] = [0, 0, 255]  # 빨간색
+            cv2.addWeighted(edge_overlay, 0.7, output, 1.0, 0, output)
         
         # 정보 표시
         y_offset = 30
         
         # 배경 박스
-        cv2.rectangle(output, (5, 5), (300, 150), (0, 0, 0), -1)
+        cv2.rectangle(output, (5, 5), (320, 150), (0, 0, 0), -1)
         
         # 텍스트
         status_color = (0, 255, 0) if lane_info.confidence > 0.5 else (0, 0, 255)
@@ -283,7 +286,7 @@ class SimpleLaneDetectionNode:
                    (10, y_offset + 35), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
         cv2.putText(output, f"Confidence: {lane_info.confidence:.2f}", 
                    (10, y_offset + 70), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
-        cv2.putText(output, f"ROI: Bottom 35%", 
+        cv2.putText(output, f"ROI: Bottom 40% (Rectangle)", 
                    (10, y_offset + 105), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 2)
         
         return output
