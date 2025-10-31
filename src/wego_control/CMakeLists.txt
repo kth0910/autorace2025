@@ -9,7 +9,6 @@ catkin_python_setup()
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
-  rospy
   std_msgs
   geometry_msgs
   nav_msgs
@@ -21,7 +20,6 @@ find_package(catkin REQUIRED COMPONENTS
 ###################################
 catkin_package(
   CATKIN_DEPENDS
-    rospy
     std_msgs
     geometry_msgs
     nav_msgs

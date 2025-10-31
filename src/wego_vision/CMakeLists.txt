@@ -9,7 +9,6 @@ catkin_python_setup()
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
-  rospy
   std_msgs
   sensor_msgs
   geometry_msgs
@@ -27,7 +26,6 @@ find_package(OpenCV REQUIRED)
 ###################################
 catkin_package(
   CATKIN_DEPENDS
-    rospy
     std_msgs
     sensor_msgs
     geometry_msgs
