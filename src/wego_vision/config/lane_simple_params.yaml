@@ -7,8 +7,8 @@ lane_detection_simple:
   lane_info_topic: "/vision/lane_info"
   debug_image_topic: "/vision/lane_image"
   
-  # ROI - 하단 35%만 사용 ⭐
-  roi_top_ratio: 0.65       # 이미지 상단 65%부터 (= 하단 35%)
+  # ROI - 하단 40%만 사용 (직사각형) ⭐
+  roi_top_ratio: 0.6        # 이미지 상단 60%부터 (= 하단 40%)
   roi_bottom_ratio: 1.0     # 이미지 하단 100%까지
   
   # 색상 필터 (흰색 차선)
