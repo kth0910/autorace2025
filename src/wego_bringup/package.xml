@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>wego_bringup</name>
+  <version>0.1.0</version>
+  <description>WeGO 통합 실행 패키지 - 전체 자율주행 스택 실행</description>
+
+  <maintainer email="wego@example.com">WeGO Team</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- 의존하는 패키지들 -->
+  <exec_depend>wego_vision</exec_depend>
+  <exec_depend>wego_planning</exec_depend>
+  <exec_depend>wego_control</exec_depend>
+
+  <!-- 추가 ROS 패키지 -->
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>rviz</exec_depend>
+
+  <export>
+  </export>
+</package>
+

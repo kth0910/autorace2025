@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- ========================================== -->
+  <!-- WeGO Minimal Launch File                   -->
+  <!-- ========================================== -->
+  <!-- 
+    필수 노드만 실행 (테스트 및 개발용)
+  -->
+
+  <arg name="node_group" default="all" doc="실행할 노드 그룹: all, vision, planning, control"/>
+
+  <!-- Vision Only -->
+  <group if="$(eval node_group == 'vision' or node_group == 'all')">
+    <include file="$(find wego_vision)/launch/vision_pipeline.launch">
+      <arg name="start_camera" value="false"/>
+    </include>
+  </group>
+
+  <!-- Planning Only -->
+  <group if="$(eval node_group == 'planning' or node_group == 'all')">
+    <include file="$(find wego_planning)/launch/planner.launch"/>
+  </group>
+
+  <!-- Control Only -->
+  <group if="$(eval node_group == 'control' or node_group == 'all')">
+    <include file="$(find wego_control)/launch/control.launch"/>
+  </group>
+
+</launch>
+

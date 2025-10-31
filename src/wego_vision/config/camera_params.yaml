@@ -1,0 +1,49 @@
+# WeGO Vision - Camera Parameters
+# 카메라 캘리브레이션 및 설정 파라미터
+
+camera:
+  # 카메라 해상도
+  width: 640
+  height: 480
+  fps: 30
+
+  # 카메라 캘리브레이션 매트릭스 (예시)
+  # 실제 사용 시 camera_calibration 패키지로 캘리브레이션 수행 필요
+  camera_matrix:
+    rows: 3
+    cols: 3
+    data: [500.0, 0.0, 320.0,
+           0.0, 500.0, 240.0,
+           0.0, 0.0, 1.0]
+  
+  # 왜곡 계수 (k1, k2, p1, p2, k3)
+  distortion_coefficients:
+    rows: 1
+    cols: 5
+    data: [0.0, 0.0, 0.0, 0.0, 0.0]
+
+detection:
+  # 감지 방법: 'aruco', 'yolo', 'both'
+  method: aruco
+  
+  # ArUco 마커 설정
+  aruco:
+    dictionary: DICT_4X4_50
+    marker_size: 0.1  # meters
+  
+  # YOLO 설정 (추후 구현)
+  yolo:
+    model_path: ""
+    confidence_threshold: 0.5
+    nms_threshold: 0.4
+
+fusion:
+  # 센서 융합 설정
+  use_lidar: false
+  use_imu: false
+  
+  # 융합 알고리즘 파라미터
+  kalman_filter:
+    process_noise: 0.01
+    measurement_noise: 0.1
+

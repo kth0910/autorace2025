@@ -1,0 +1,106 @@
+# WeGO Control - Control Parameters
+# 차량 제어 파라미터 설정
+
+controller:
+  # 제어기 타입: 'stanley', 'pid', 'mpc'
+  type: stanley
+  
+  # 제어 주기 (Hz)
+  frequency: 20.0
+
+# 차량 파라미터
+vehicle:
+  # 축간 거리 (meters)
+  wheelbase: 0.32
+  
+  # 최대 조향각 (radians)
+  max_steering_angle: 0.5  # ~28.6 degrees
+  
+  # 최대 속도 (m/s)
+  max_speed: 2.0
+  
+  # 최대 가속도 (m/s^2)
+  max_acceleration: 1.0
+  
+  # 최대 감속도 (m/s^2)
+  max_deceleration: 2.0
+
+# Stanley Controller 파라미터
+stanley:
+  # Cross-track error gain
+  k: 1.0
+  
+  # Softening constant (속도가 0에 가까울 때 안정성)
+  k_soft: 2.5
+  
+  # 최대 cross-track error (meters)
+  max_cross_track_error: 2.0
+
+# PID Controller 파라미터
+pid:
+  # 조향 PID
+  steering:
+    kp: 1.0
+    ki: 0.0
+    kd: 0.1
+  
+  # 속도 PID
+  speed:
+    kp: 0.5
+    ki: 0.1
+    kd: 0.05
+
+# MPC Controller 파라미터
+mpc:
+  # 예측 구간 (seconds)
+  prediction_horizon: 2.0
+  
+  # 제어 구간 (seconds)
+  control_horizon: 0.5
+  
+  # 가중치
+  weights:
+    cross_track_error: 10.0
+    heading_error: 5.0
+    steering_effort: 1.0
+    steering_rate: 1.0
+
+# VESC Bridge 파라미터
+vesc:
+  # 조향각 → 서보 위치 변환
+  steering_to_servo_gain: 0.5
+  steering_offset: 0.5  # 중앙 위치
+  
+  # 속도 → ERPM 변환
+  # ERPM = speed (m/s) * gain + offset
+  speed_to_erpm_gain: 4000.0
+  speed_to_erpm_offset: 0.0
+  
+  # 서보 제한
+  servo:
+    min_position: 0.0
+    max_position: 1.0
+  
+  # 모터 제한
+  motor:
+    max_erpm: 20000.0
+    min_erpm: -20000.0
+
+# 안전 파라미터
+safety:
+  # 비상 정지 조건
+  emergency_stop:
+    # 장애물과의 최소 거리 (meters)
+    min_obstacle_distance: 0.3
+    
+    # 최대 cross-track error (meters)
+    max_cross_track_error: 1.5
+  
+  # 워치독 타이머
+  watchdog:
+    # 명령 타임아웃 (seconds)
+    command_timeout: 0.5
+    
+    # Odometry 타임아웃 (seconds)
+    odom_timeout: 0.5
+

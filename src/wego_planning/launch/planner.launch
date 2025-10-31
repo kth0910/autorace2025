@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- WeGO Planning Launch File -->
+  <!-- 전역 및 지역 경로 계획 노드를 실행합니다 -->
+
+  <!-- Path Planner Node - 전역 경로 계획 -->
+  <node name="path_planner_node" pkg="wego_planning" type="path_planner_node.py" output="screen">
+    <param name="obstacles_topic" value="/vision/fused_objects"/>
+    <param name="odom_topic" value="/odom"/>
+    <param name="output_topic" value="/planning/path"/>
+    <param name="algorithm" value="astar"/>
+    <param name="frequency" value="1.0"/>
+  </node>
+
+  <!-- Local Planner Node - 지역 궤적 생성 -->
+  <node name="local_planner_node" pkg="wego_planning" type="local_planner_node.py" output="screen">
+    <param name="global_path_topic" value="/planning/path"/>
+    <param name="odom_topic" value="/odom"/>
+    <param name="obstacles_topic" value="/vision/fused_objects"/>
+    <param name="output_topic" value="/planning/trajectory"/>
+    <param name="planner_type" value="dwa"/>
+    <param name="frequency" value="10.0"/>
+    <param name="lookahead_distance" value="2.0"/>
+  </node>
+
+  <!-- RViz 시각화 (선택적) -->
+  <arg name="rviz" default="false"/>
+  <node if="$(arg rviz)" name="rviz" pkg="rviz" type="rviz" 
+        args="-d $(find wego_planning)/config/planning.rviz"/>
+
+  <!-- Static TF (맵 프레임) -->
+  <node pkg="tf" type="static_transform_publisher" name="map_to_odom" 
+        args="0 0 0 0 0 0 map odom 100"/>
+
+</launch>
+

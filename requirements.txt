@@ -1,0 +1,25 @@
+# WeGO - Python Dependencies
+# ROS Noetic (Python 3.8+) 환경용 의존성 패키지
+
+# Computer Vision
+opencv-python>=4.5.0
+opencv-contrib-python>=4.5.0
+
+# Numerical Computing
+numpy>=1.19.0
+scipy>=1.5.0
+
+# ROS Python Libraries (일반적으로 apt로 설치하지만 참고용)
+# rospy (ROS 패키지로 설치)
+# cv_bridge (ROS 패키지로 설치)
+# tf (ROS 패키지로 설치)
+
+# 추가 유틸리티
+pyyaml>=5.3.0
+matplotlib>=3.3.0
+
+# 향후 추가 예정:
+# ultralytics>=8.0.0  # YOLOv8
+# torch>=1.9.0        # PyTorch (딥러닝)
+# torchvision>=0.10.0 # PyTorch Vision
+

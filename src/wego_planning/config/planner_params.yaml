@@ -1,0 +1,74 @@
+# WeGO Planning - Planner Parameters
+# 경로 계획 알고리즘 설정
+
+path_planner:
+  # 계획 알고리즘: 'astar', 'rrt', 'dijkstra'
+  algorithm: astar
+  
+  # 계획 주기 (Hz)
+  frequency: 1.0
+  
+  # A* 파라미터
+  astar:
+    grid_resolution: 0.1  # meters
+    heuristic_weight: 1.0
+  
+  # RRT 파라미터
+  rrt:
+    max_iterations: 1000
+    step_size: 0.5  # meters
+    goal_tolerance: 0.5  # meters
+
+local_planner:
+  # 플래너 타입: 'dwa', 'teb', 'pure_pursuit'
+  planner_type: dwa
+  
+  # 계획 주기 (Hz)
+  frequency: 10.0
+  
+  # 전방 주시 거리 (meters)
+  lookahead_distance: 2.0
+  
+  # DWA (Dynamic Window Approach) 파라미터
+  dwa:
+    # 속도 제한
+    max_vel_x: 1.0  # m/s
+    min_vel_x: 0.0
+    max_vel_theta: 1.0  # rad/s
+    
+    # 가속도 제한
+    acc_lim_x: 0.5  # m/s^2
+    acc_lim_theta: 1.0  # rad/s^2
+    
+    # 시뮬레이션 파라미터
+    sim_time: 2.0  # seconds
+    sim_granularity: 0.05  # seconds
+    
+    # 평가 함수 가중치
+    path_distance_bias: 32.0
+    goal_distance_bias: 20.0
+    occdist_scale: 0.02
+  
+  # TEB (Timed Elastic Band) 파라미터
+  teb:
+    min_obstacle_dist: 0.5  # meters
+    max_vel_x: 1.0  # m/s
+    max_vel_theta: 1.0  # rad/s
+  
+  # Pure Pursuit 파라미터
+  pure_pursuit:
+    lookahead_distance: 2.0  # meters
+    max_vel: 1.0  # m/s
+
+# 공통 파라미터
+common:
+  # 로봇 형상 (Footprint)
+  robot_radius: 0.3  # meters
+  
+  # 안전 거리
+  safety_distance: 0.5  # meters
+  
+  # 목표 도달 허용 오차
+  xy_goal_tolerance: 0.2  # meters
+  yaw_goal_tolerance: 0.1  # radians
+

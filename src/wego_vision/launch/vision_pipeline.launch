@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- WeGO Vision Pipeline Launch File -->
+  <!-- 카메라, 객체 감지, 센서 융합 노드를 실행합니다 -->
+
+  <!-- USB 카메라 노드 (선택적) -->
+  <arg name="start_camera" default="true"/>
+  <group if="$(arg start_camera)">
+    <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen">
+      <param name="video_device" value="/dev/video0"/>
+      <param name="image_width" value="640"/>
+      <param name="image_height" value="480"/>
+      <param name="pixel_format" value="yuyv"/>
+      <param name="camera_frame_id" value="camera_link"/>
+      <param name="io_method" value="mmap"/>
+      <param name="camera_name" value="wego_camera"/>
+    </node>
+  </group>
+
+  <!-- Camera Node - 이미지 보정 -->
+  <node name="camera_node" pkg="wego_vision" type="camera_node.py" output="screen">
+    <param name="camera_topic" value="/usb_cam/image_raw"/>
+    <param name="output_topic" value="/vision/image_rect"/>
+  </node>
+
+  <!-- Detection Node - 객체 감지 -->
+  <node name="detection_node" pkg="wego_vision" type="detection_node.py" output="screen">
+    <param name="image_topic" value="/vision/image_rect"/>
+    <param name="output_topic" value="/vision/obstacles"/>
+    <param name="detection_method" value="aruco"/>
+  </node>
+
+  <!-- Fusion Node - 센서 융합 -->
+  <node name="fusion_node" pkg="wego_vision" type="fusion_node.py" output="screen">
+    <param name="vision_topic" value="/vision/obstacles"/>
+    <param name="output_topic" value="/vision/fused_objects"/>
+    <param name="use_lidar" value="false"/>
+    <param name="use_imu" value="false"/>
+  </node>
+
+  <!-- RViz 시각화 (선택적) -->
+  <arg name="rviz" default="false"/>
+  <node if="$(arg rviz)" name="rviz" pkg="rviz" type="rviz" 
+        args="-d $(find wego_vision)/config/vision.rviz"/>
+
+</launch>
+

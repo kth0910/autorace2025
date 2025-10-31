@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- ========================================== -->
+  <!-- WeGO Autonomous Driving Stack Launch File -->
+  <!-- ========================================== -->
+  <!-- 
+    전체 자율주행 시스템을 실행합니다.
+    VISION → PLANNING → CONTROL 파이프라인
+  -->
+
+  <!-- Arguments -->
+  <arg name="rviz" default="false" doc="RViz 시각화 실행 여부"/>
+  <arg name="use_camera" default="true" doc="USB 카메라 실행 여부"/>
+  <arg name="simulation" default="false" doc="시뮬레이션 모드 (더미 데이터 사용)"/>
+
+  <!-- ========================================== -->
+  <!-- 1. VISION Pipeline                         -->
+  <!-- ========================================== -->
+  <group ns="vision">
+    <include file="$(find wego_vision)/launch/vision_pipeline.launch">
+      <arg name="start_camera" value="$(arg use_camera)"/>
+      <arg name="rviz" value="false"/>
+    </include>
+  </group>
+
+  <!-- ========================================== -->
+  <!-- 2. PLANNING Pipeline                       -->
+  <!-- ========================================== -->
+  <group ns="planning">
+    <include file="$(find wego_planning)/launch/planner.launch">
+      <arg name="rviz" value="false"/>
+    </include>
+  </group>
+
+  <!-- ========================================== -->
+  <!-- 3. CONTROL Pipeline                        -->
+  <!-- ========================================== -->
+  <group ns="control">
+    <include file="$(find wego_control)/launch/control.launch">
+      <arg name="rviz" value="false"/>
+    </include>
+  </group>
+
+  <!-- ========================================== -->
+  <!-- Visualization (RViz)                       -->
+  <!-- ========================================== -->
+  <group if="$(arg rviz)">
+    <node name="rviz" pkg="rviz" type="rviz" 
+          args="-d $(find wego_bringup)/config/wego_autonomous.rviz" 
+          output="screen"/>
+  </group>
+
+  <!-- ========================================== -->
+  <!-- Simulation Mode (Optional)                 -->
+  <!-- ========================================== -->
+  <group if="$(arg simulation)">
+    <!-- Dummy Odometry Publisher -->
+    <node name="dummy_odom" pkg="wego_bringup" type="dummy_odom_node.py" output="screen"/>
+    
+    <!-- Static TF: map -> odom -> base_link -->
+    <node pkg="tf" type="static_transform_publisher" name="map_to_odom" 
+          args="0 0 0 0 0 0 map odom 100"/>
+    <node pkg="tf" type="static_transform_publisher" name="odom_to_base_link" 
+          args="0 0 0 0 0 0 odom base_link 100"/>
+  </group>
+
+  <!-- ========================================== -->
+  <!-- Logging                                    -->
+  <!-- ========================================== -->
+  <node name="logger" pkg="rospy_tutorials" type="talker" output="screen" unless="$(arg simulation)"/>
+
+  <!-- ========================================== -->
+  <!-- System Monitor (Optional)                  -->
+  <!-- ========================================== -->
+  <!-- <include file="$(find wego_bringup)/launch/system_monitor.launch"/> -->
+
+</launch>
+

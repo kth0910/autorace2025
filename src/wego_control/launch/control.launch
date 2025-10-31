@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- WeGO Control Launch File -->
+  <!-- 차량 제어 및 VESC 브릿지 노드를 실행합니다 -->
+
+  <!-- Controller Node - 경로 추종 제어 -->
+  <node name="controller_node" pkg="wego_control" type="controller_node.py" output="screen">
+    <param name="trajectory_topic" value="/planning/trajectory"/>
+    <param name="odom_topic" value="/odom"/>
+    <param name="output_topic" value="/ackermann_cmd"/>
+    <param name="controller_type" value="stanley"/>
+    <param name="frequency" value="20.0"/>
+    
+    <!-- Vehicle parameters -->
+    <param name="wheelbase" value="0.32"/>
+    <param name="max_steering_angle" value="0.5"/>
+    <param name="max_speed" value="2.0"/>
+    
+    <!-- Stanley controller parameters -->
+    <param name="k_stanley" value="1.0"/>
+    <param name="k_soft" value="2.5"/>
+  </node>
+
+  <!-- VESC Bridge Node - Ackermann to VESC 변환 -->
+  <node name="vesc_bridge_node" pkg="wego_control" type="vesc_bridge_node.py" output="screen">
+    <param name="ackermann_topic" value="/ackermann_cmd"/>
+    <param name="motor_topic" value="/commands/motor/speed"/>
+    <param name="servo_topic" value="/commands/servo/position"/>
+    
+    <!-- Vehicle parameters -->
+    <param name="wheelbase" value="0.32"/>
+    <param name="steering_to_servo_gain" value="0.5"/>
+    <param name="steering_offset" value="0.5"/>
+    
+    <!-- Speed conversion parameters -->
+    <param name="speed_to_erpm_gain" value="4000.0"/>
+    <param name="speed_to_erpm_offset" value="0.0"/>
+    
+    <!-- Safety limits -->
+    <param name="max_servo_position" value="1.0"/>
+    <param name="min_servo_position" value="0.0"/>
+    <param name="max_motor_speed" value="20000.0"/>
+  </node>
+
+  <!-- RViz 시각화 (선택적) -->
+  <arg name="rviz" default="false"/>
+  <node if="$(arg rviz)" name="rviz" pkg="rviz" type="rviz" 
+        args="-d $(find wego_control)/config/control.rviz"/>
+
+</launch>
+

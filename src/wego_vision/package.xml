@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>wego_vision</name>
+  <version>0.1.0</version>
+  <description>WeGO 비전 인식 패키지 - 카메라, 객체 감지, 센서 융합</description>
+
+  <maintainer email="wego@example.com">WeGO Team</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Python 3 지원 -->
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>python3-opencv</exec_depend>
+
+  <!-- ROS 메시지 의존성 -->
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>cv_bridge</depend>
+  <depend>image_transport</depend>
+  <depend>message_filters</depend>
+
+  <!-- 추가 의존성 -->
+  <exec_depend>usb_cam</exec_depend>
+
+  <export>
+  </export>
+</package>
+
