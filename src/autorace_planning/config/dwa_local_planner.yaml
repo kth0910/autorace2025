@@ -17,3 +17,7 @@ DWAPlannerROS:
   forward_point_distance: 0.5
   stop_time_buffer: 0.2
   prune_plan: true
+
+  # ↓↓↓ 시각화 토픽 출력 활성화 ↓↓↓
+  publish_traj_pc: true
+  publish_cost_grid_pc: true
