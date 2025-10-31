@@ -23,6 +23,11 @@
     <param name="output_topic" value="/vision/image_rect"/>
   </node>
 
+  <!-- Lane Detection Node - 차선 인식 ⭐ NEW -->
+  <node name="lane_detection_node" pkg="wego_vision" type="lane_detection_node.py" output="screen">
+    <rosparam command="load" file="$(find wego_vision)/config/lane_detection_params.yaml"/>
+  </node>
+
   <!-- Detection Node - 객체 감지 -->
   <node name="detection_node" pkg="wego_vision" type="detection_node.py" output="screen">
     <param name="image_topic" value="/vision/image_rect"/>

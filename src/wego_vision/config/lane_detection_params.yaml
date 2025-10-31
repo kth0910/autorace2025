@@ -1,0 +1,48 @@
+# WeGO Vision - Lane Detection Parameters
+# 차선 인식 파라미터 설정
+
+lane_detection_node:
+  # Topic 설정
+  image_topic: "/vision/image_rect"
+  lane_info_topic: "/vision/lane_info"
+  debug_image_topic: "/vision/lane_image"
+  
+  # ROI (Region of Interest) 설정
+  # 이미지의 상단/하단 비율 (0.0 ~ 1.0)
+  roi_top_ratio: 0.5        # 이미지 상단 50%부터
+  roi_bottom_ratio: 1.0     # 이미지 하단 100%까지
+  
+  # 색상 필터링 (HSV 색공간)
+  # 흰색 차선 검출 범위
+  white_lower: [0, 0, 200]      # [H, S, V] 하한
+  white_upper: [180, 30, 255]   # [H, S, V] 상한
+  
+  # 노란색 차선 검출 범위
+  yellow_lower: [20, 100, 100]  # [H, S, V] 하한
+  yellow_upper: [30, 255, 255]  # [H, S, V] 상한
+  
+  # Edge Detection (Canny)
+  canny_low: 50           # Canny 낮은 임계값
+  canny_high: 150         # Canny 높은 임계값
+  
+  # Hough Line Transform
+  hough_threshold: 20              # 선 검출 임계값
+  hough_min_line_length: 20        # 최소 선 길이 (픽셀)
+  hough_max_line_gap: 300          # 선 간 최대 간격 (픽셀)
+  
+  # 차선 파라미터
+  lane_width_meters: 0.3           # 차선 폭 (미터)
+  camera_height: 0.2               # 카메라 높이 (미터)
+  pixels_per_meter: 500            # 픽셀/미터 변환 계수
+  
+  # Debugging
+  publish_debug_image: true        # 디버그 이미지 발행 여부
+
+# 실내 테스트용 설정 (검은 테이프 차선)
+# lane_detection_node:
+#   white_lower: [0, 0, 0]
+#   white_upper: [180, 255, 50]    # 어두운 색 검출
+#   roi_top_ratio: 0.6
+#   canny_low: 30
+#   canny_high: 100
+
