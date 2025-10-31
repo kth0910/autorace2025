@@ -2,21 +2,12 @@ cmake_minimum_required(VERSION 3.0.2)
 project(wego_bringup)
 
 ## Find catkin macros and libraries
-find_package(catkin REQUIRED COMPONENTS
-  wego_vision
-  wego_planning
-  wego_control
-)
+find_package(catkin REQUIRED)
 
 ###################################
 ## catkin specific configuration ##
 ###################################
-catkin_package(
-  CATKIN_DEPENDS
-    wego_vision
-    wego_planning
-    wego_control
-)
+catkin_package()
 
 #############
 ## Install ##
