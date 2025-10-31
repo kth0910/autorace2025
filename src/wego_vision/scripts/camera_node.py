@@ -17,6 +17,7 @@ from cv_bridge import CvBridge
 import cv2
 import yaml
 import os
+import numpy as np
 
 
 class CameraNode:
@@ -59,20 +60,24 @@ class CameraNode:
             with open(self.calibration_file, 'r') as f:
                 calib_data = yaml.safe_load(f)
             
-            # Camera matrix
+            # Camera matrix - numpy 배열로 직접 생성
             if 'camera_matrix' in calib_data:
                 matrix_data = calib_data['camera_matrix']['data']
-                self.camera_matrix = cv2.Mat(3, 3, cv2.CV_64F, matrix_data).reshape(3, 3)
+                self.camera_matrix = np.array(matrix_data, dtype=np.float64).reshape(3, 3)
             
-            # Distortion coefficients
+            # Distortion coefficients - numpy 배열로 직접 생성
             if 'distortion_coefficients' in calib_data:
                 dist_data = calib_data['distortion_coefficients']['data']
-                self.dist_coeffs = cv2.Mat(1, 5, cv2.CV_64F, dist_data)
+                self.dist_coeffs = np.array(dist_data, dtype=np.float64).reshape(1, 5)
             
             rospy.loginfo("[Camera Node] 캘리브레이션 파일 로드 성공")
+            rospy.loginfo(f"  - Camera Matrix:\n{self.camera_matrix}")
+            rospy.loginfo(f"  - Distortion Coeffs: {self.dist_coeffs}")
         
         except Exception as e:
             rospy.logerr(f"[Camera Node] 캘리브레이션 로드 실패: {e}")
+            import traceback
+            rospy.logerr(traceback.format_exc())
     
     def image_callback(self, msg):
         """
