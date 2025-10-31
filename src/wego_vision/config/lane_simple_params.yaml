@@ -1,0 +1,58 @@
+# WeGO Vision - Simple Lane Detection Parameters
+# 단순 차선 검출 (좌/우 구분 없음, ROI 하단 35%)
+
+lane_detection_simple:
+  # Topic 설정
+  image_topic: "/vision/image_rect"
+  lane_info_topic: "/vision/lane_info"
+  debug_image_topic: "/vision/lane_image"
+  
+  # ROI - 하단 35%만 사용 ⭐
+  roi_top_ratio: 0.65       # 이미지 상단 65%부터 (= 하단 35%)
+  roi_bottom_ratio: 1.0     # 이미지 하단 100%까지
+  
+  # 색상 필터 (흰색 차선)
+  white_lower: [0, 0, 180]      # 밝은 흰색
+  white_upper: [180, 30, 255]
+  
+  # Edge + 색상 가중치
+  color_weight: 0.3             # 색상 30% + Edge 70%
+  
+  # Gaussian Blur
+  blur_kernel: 5
+  
+  # Canny Edge Detection
+  canny_low: 50           # Edge 검출 하한
+  canny_high: 150         # Edge 검출 상한
+  
+  # Hough Line Transform
+  hough_threshold: 30              # 선 검출 임계값
+  hough_min_line_length: 20        # 최소 선 길이
+  hough_max_line_gap: 200          # 선 간 최대 간격
+  
+  # 변환 파라미터
+  pixels_per_meter: 500            # 픽셀/미터 변환
+  
+  # Debugging
+  publish_debug_image: true
+
+# 환경별 빠른 설정:
+#
+# 밝은 환경:
+#   white_lower: [0, 0, 200]
+#   canny_low: 60
+#   canny_high: 180
+#
+# 어두운 환경:
+#   white_lower: [0, 0, 150]
+#   canny_low: 40
+#   canny_high: 120
+#
+# 흐린 차선:
+#   hough_threshold: 20
+#   color_weight: 0.5
+#
+# ROI 조정:
+#   roi_top_ratio: 0.5   # 하단 50%
+#   roi_top_ratio: 0.7   # 하단 30%
+
