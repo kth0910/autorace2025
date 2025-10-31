@@ -69,6 +69,10 @@ class HybridLaneDetectionNode:
         self.lane_info_pub = rospy.Publisher(self.lane_info_topic, LaneInfo, queue_size=10)
         if self.publish_debug_image:
             self.debug_image_pub = rospy.Publisher(self.debug_image_topic, Image, queue_size=10)
+            # 추가 디버그 토픽들
+            self.edge_pub = rospy.Publisher('/vision/debug/edges', Image, queue_size=10)
+            self.color_pub = rospy.Publisher('/vision/debug/color_mask', Image, queue_size=10)
+            self.combined_pub = rospy.Publisher('/vision/debug/combined_mask', Image, queue_size=10)
         
         # Subscriber
         self.image_sub = rospy.Subscriber(self.image_topic, Image, self.image_callback)
@@ -120,6 +124,10 @@ class HybridLaneDetectionNode:
         
         # 2-B. 색상 기반 검출 (보조, 30%)
         color_mask = self.detect_white_color(image, roi_mask)
+        
+        # 디버그 이미지 발행
+        if self.publish_debug_image:
+            self.publish_debug_masks(edge_mask, color_mask, header)
         
         # 3. 하이브리드 결합
         # Edge를 메인으로, 색상을 보조로
@@ -330,6 +338,21 @@ class HybridLaneDetectionNode:
         avg_curve = (left_curve + right_curve) / 2
         curvature = avg_curve / (self.pixels_per_meter ** 2)
         return float(curvature)
+    
+    def publish_debug_masks(self, edge_mask, color_mask, header):
+        """디버그 마스크 이미지 발행"""
+        try:
+            # Edge 마스크
+            edge_msg = self.bridge.cv2_to_imgmsg(edge_mask, encoding='mono8')
+            edge_msg.header = header
+            self.edge_pub.publish(edge_msg)
+            
+            # Color 마스크
+            color_msg = self.bridge.cv2_to_imgmsg(color_mask, encoding='mono8')
+            color_msg.header = header
+            self.color_pub.publish(color_msg)
+        except:
+            pass
     
     def draw_lanes(self, image, lane_info):
         """차선 그리기"""
