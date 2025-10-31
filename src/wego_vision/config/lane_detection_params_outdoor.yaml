@@ -1,0 +1,38 @@
+# WeGO Vision - Lane Detection Parameters (Outdoor / White Lines)
+# 실외 환경, 흰색 차선용 설정
+
+lane_detection_node:
+  # Topic 설정
+  image_topic: "/vision/image_rect"
+  lane_info_topic: "/vision/lane_info"
+  debug_image_topic: "/vision/lane_image"
+  
+  # ROI (Region of Interest) 설정
+  roi_top_ratio: 0.5        # 이미지 상단 50%부터
+  roi_bottom_ratio: 1.0     # 이미지 하단 100%까지
+  
+  # 색상 필터링 - 밝은 흰색 검출 ⭐
+  white_lower: [0, 0, 200]      # 밝은 흰색만
+  white_upper: [180, 30, 255]
+  
+  # 노란색 차선 (실외 도로)
+  yellow_lower: [20, 100, 100]
+  yellow_upper: [30, 255, 255]
+  
+  # Edge Detection
+  canny_low: 50
+  canny_high: 150
+  
+  # Hough Line Transform
+  hough_threshold: 20
+  hough_min_line_length: 20
+  hough_max_line_gap: 300
+  
+  # 차선 파라미터
+  lane_width_meters: 0.3
+  camera_height: 0.2
+  pixels_per_meter: 500
+  
+  # Debugging
+  publish_debug_image: true
+

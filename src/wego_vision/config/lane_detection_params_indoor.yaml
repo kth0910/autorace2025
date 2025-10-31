@@ -1,0 +1,38 @@
+# WeGO Vision - Lane Detection Parameters (Indoor / Black Tape)
+# 실내 환경, 검은 테이프 차선용 설정
+
+lane_detection_node:
+  # Topic 설정
+  image_topic: "/vision/image_rect"
+  lane_info_topic: "/vision/lane_info"
+  debug_image_topic: "/vision/lane_image"
+  
+  # ROI (Region of Interest) 설정
+  roi_top_ratio: 0.5        # 이미지 상단 50%부터 (더 넓게)
+  roi_bottom_ratio: 1.0     # 이미지 하단 100%까지
+  
+  # 색상 필터링 - 검은색/어두운 색 검출 ⭐
+  white_lower: [0, 0, 0]        # 검은색 포함
+  white_upper: [180, 255, 80]   # 어두운 회색까지
+  
+  # 노란색 비활성화 (실내에서는 보통 안 씀)
+  yellow_lower: [0, 0, 0]
+  yellow_upper: [0, 0, 0]
+  
+  # Edge Detection - 더 민감하게 ⭐
+  canny_low: 30            # 낮춤 (더 많은 edge 검출)
+  canny_high: 100          # 낮춤
+  
+  # Hough Line Transform - 더 관대하게 ⭐
+  hough_threshold: 15              # 낮춤 (더 많은 선 검출)
+  hough_min_line_length: 15        # 짧은 선도 검출
+  hough_max_line_gap: 200          # 간격 줄임
+  
+  # 차선 파라미터
+  lane_width_meters: 0.3
+  camera_height: 0.2
+  pixels_per_meter: 500
+  
+  # Debugging
+  publish_debug_image: true
+
