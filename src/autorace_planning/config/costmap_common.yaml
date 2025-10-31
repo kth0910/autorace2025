@@ -1,0 +1,13 @@
+obstacle_range: 3.0
+raytrace_range: 3.5
+footprint: [[-0.18, -0.14], [-0.18, 0.14], [0.18, 0.14], [0.18, -0.14]]
+observation_sources: scan
+scan:
+  sensor_frame: base_laser
+  data_type: LaserScan
+  topic: /scan
+  expected_update_rate: 0.2
+  marking: true
+  clearing: true
+inflation_radius: 0.5
+cost_scaling_factor: 10.0
