@@ -45,4 +45,3 @@ projection_matrix:
 
 # Distortion Model
 distortion_model: plumb_bob
-

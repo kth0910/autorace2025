@@ -6,7 +6,7 @@
   <!-- USB 카메라 노드 (선택적) -->
   <arg name="start_camera" default="true"/>
   <group if="$(arg start_camera)">
-    <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen">
+    <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="log">
       <param name="video_device" value="/dev/video0"/>
       <param name="image_width" value="640"/>
       <param name="image_height" value="480"/>
@@ -15,10 +15,13 @@
       <param name="io_method" value="mmap"/>
       <param name="camera_name" value="wego_camera"/>
       
-      <!-- 카메라 제어 설정 (일부 카메라는 지원 안함) -->
+      <!-- 카메라 제어 설정 - 지원 안 하는 카메라는 자동으로 무시됨 -->
       <param name="autofocus" value="false"/>
-      <param name="autoexposure" value="false"/>
-      <param name="auto_white_balance" value="false"/>
+      <param name="focus_absolute" value="-1"/>
+      <param name="brightness" value="-1"/>
+      <param name="contrast" value="-1"/>
+      <param name="saturation" value="-1"/>
+      <param name="sharpness" value="-1"/>
     </node>
   </group>
 
