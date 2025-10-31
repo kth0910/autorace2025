@@ -5,8 +5,9 @@ from distutils.core import setup
 from catkin_pkg.python_setup import generate_distutils_setup
 
 # Setup configuration for wego_control package
+# 빈 패키지 설정
 setup_args = generate_distutils_setup(
-    packages=['wego_control'],
+    packages=[],
     package_dir={'': 'src'},
 )
 
