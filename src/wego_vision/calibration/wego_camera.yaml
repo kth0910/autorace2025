@@ -1,0 +1,48 @@
+# Camera Calibration File for WeGO
+# 이 파일은 camera_calibration 패키지로 생성된 캘리브레이션 데이터입니다.
+# 실제 사용 전 반드시 자신의 카메라로 캘리브레이션을 수행하세요!
+
+image_width: 640
+image_height: 480
+camera_name: wego_camera
+
+# Camera Matrix (Intrinsic Parameters)
+# [fx  0  cx]
+# [ 0 fy  cy]
+# [ 0  0   1]
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [500.0, 0.0, 320.0,
+         0.0, 500.0, 240.0,
+         0.0, 0.0, 1.0]
+
+# Distortion Coefficients
+# [k1, k2, p1, p2, k3]
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [0.0, 0.0, 0.0, 0.0, 0.0]
+
+# Rectification Matrix (for stereo, identity for mono)
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1.0, 0.0, 0.0,
+         0.0, 1.0, 0.0,
+         0.0, 0.0, 1.0]
+
+# Projection Matrix
+# [fx'  0  cx' Tx]
+# [ 0  fy' cy' Ty]
+# [ 0   0   1   0]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [500.0, 0.0, 320.0, 0.0,
+         0.0, 500.0, 240.0, 0.0,
+         0.0, 0.0, 1.0, 0.0]
+
+# Distortion Model
+distortion_model: plumb_bob
+

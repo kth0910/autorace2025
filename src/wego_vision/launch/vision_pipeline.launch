@@ -14,6 +14,11 @@
       <param name="camera_frame_id" value="camera_link"/>
       <param name="io_method" value="mmap"/>
       <param name="camera_name" value="wego_camera"/>
+      
+      <!-- 카메라 제어 설정 (일부 카메라는 지원 안함) -->
+      <param name="autofocus" value="false"/>
+      <param name="autoexposure" value="false"/>
+      <param name="auto_white_balance" value="false"/>
     </node>
   </group>
 
@@ -21,6 +26,7 @@
   <node name="camera_node" pkg="wego_vision" type="camera_node.py" output="screen">
     <param name="camera_topic" value="/usb_cam/image_raw"/>
     <param name="output_topic" value="/vision/image_rect"/>
+    <param name="calibration_file" value="$(find wego_vision)/calibration/wego_camera.yaml"/>
   </node>
 
   <!-- Lane Detection Node - 차선 인식 ⭐ NEW -->
@@ -36,11 +42,13 @@
   </node>
 
   <!-- Fusion Node - 센서 융합 -->
+  <arg name="use_lidar" default="true"/>
+  <arg name="use_imu" default="true"/>
   <node name="fusion_node" pkg="wego_vision" type="fusion_node.py" output="screen">
     <param name="vision_topic" value="/vision/obstacles"/>
     <param name="output_topic" value="/vision/fused_objects"/>
-    <param name="use_lidar" value="false"/>
-    <param name="use_imu" value="false"/>
+    <param name="use_lidar" value="$(arg use_lidar)"/>
+    <param name="use_imu" value="$(arg use_imu)"/>
   </node>
 
   <!-- RViz 시각화 (선택적) -->
