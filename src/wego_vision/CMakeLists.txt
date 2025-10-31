@@ -74,6 +74,8 @@ catkin_install_python(PROGRAMS
   scripts/detection_node.py
   scripts/fusion_node.py
   scripts/lane_detection_node.py
+  scripts/lane_detection_edge_based.py
+  scripts/lane_detection_hybrid.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
