@@ -15,6 +15,8 @@ import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import cv2
+import yaml
+import os
 
 
 class CameraNode:
@@ -24,9 +26,15 @@ class CameraNode:
         # Parameters
         self.camera_topic = rospy.get_param('~camera_topic', '/usb_cam/image_raw')
         self.output_topic = rospy.get_param('~output_topic', '/vision/image_rect')
+        self.calibration_file = rospy.get_param('~calibration_file', '')
         
         # CV Bridge
         self.bridge = CvBridge()
+        
+        # Camera calibration
+        self.camera_matrix = None
+        self.dist_coeffs = None
+        self.load_calibration()
         
         # Publisher & Subscriber
         self.image_pub = rospy.Publisher(self.output_topic, Image, queue_size=10)
@@ -35,19 +43,59 @@ class CameraNode:
         rospy.loginfo("[Camera Node] 초기화 완료")
         rospy.loginfo(f"  - 입력 토픽: {self.camera_topic}")
         rospy.loginfo(f"  - 출력 토픽: {self.output_topic}")
+        rospy.loginfo(f"  - 캘리브레이션: {'사용' if self.camera_matrix is not None else '미사용'}")
+    
+    def load_calibration(self):
+        """카메라 캘리브레이션 파일 로드"""
+        if not self.calibration_file:
+            rospy.logwarn("[Camera Node] 캘리브레이션 파일이 지정되지 않음. 왜곡 보정 없이 실행")
+            return
+        
+        if not os.path.exists(self.calibration_file):
+            rospy.logwarn(f"[Camera Node] 캘리브레이션 파일 없음: {self.calibration_file}")
+            return
+        
+        try:
+            with open(self.calibration_file, 'r') as f:
+                calib_data = yaml.safe_load(f)
+            
+            # Camera matrix
+            if 'camera_matrix' in calib_data:
+                matrix_data = calib_data['camera_matrix']['data']
+                self.camera_matrix = cv2.Mat(3, 3, cv2.CV_64F, matrix_data).reshape(3, 3)
+            
+            # Distortion coefficients
+            if 'distortion_coefficients' in calib_data:
+                dist_data = calib_data['distortion_coefficients']['data']
+                self.dist_coeffs = cv2.Mat(1, 5, cv2.CV_64F, dist_data)
+            
+            rospy.loginfo("[Camera Node] 캘리브레이션 파일 로드 성공")
+        
+        except Exception as e:
+            rospy.logerr(f"[Camera Node] 캘리브레이션 로드 실패: {e}")
     
     def image_callback(self, msg):
         """
         카메라 이미지 콜백 함수
-        실제 구현에서는 카메라 캘리브레이션, 왜곡 보정 등을 수행
+        캘리브레이션이 있으면 왜곡 보정 수행
         """
         try:
             # ROS Image → OpenCV
             cv_image = self.bridge.imgmsg_to_cv2(msg, desired_encoding='bgr8')
             
-            # TODO: 이미지 전처리 (캘리브레이션, 왜곡 보정)
-            # rectified_image = self.undistort(cv_image)
-            rectified_image = cv_image  # Placeholder
+            # 왜곡 보정 (캘리브레이션이 있는 경우)
+            if self.camera_matrix is not None and self.dist_coeffs is not None:
+                h, w = cv_image.shape[:2]
+                new_camera_matrix, roi = cv2.getOptimalNewCameraMatrix(
+                    self.camera_matrix, self.dist_coeffs, (w, h), 1, (w, h)
+                )
+                rectified_image = cv2.undistort(
+                    cv_image, self.camera_matrix, self.dist_coeffs, 
+                    None, new_camera_matrix
+                )
+            else:
+                # 캘리브레이션 없으면 원본 그대로
+                rectified_image = cv_image
             
             # OpenCV → ROS Image
             output_msg = self.bridge.cv2_to_imgmsg(rectified_image, encoding='bgr8')
