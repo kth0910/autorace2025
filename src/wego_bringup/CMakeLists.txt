@@ -13,6 +13,13 @@ catkin_package()
 ## Install ##
 #############
 
+# Install Python scripts
+catkin_install_python(PROGRAMS
+  scripts/dummy_odom_node.py
+  scripts/real_odom_node.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
 # Install launch files
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch

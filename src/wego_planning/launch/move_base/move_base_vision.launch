@@ -7,15 +7,15 @@
 
   <node pkg="move_base" type="move_base" name="move_base" output="screen">
     <rosparam if="$(eval not arg('use_laserscan'))"
-              file="$(find autorace_planning)/config/costmap_common_vision.yaml"
+              file="$(find wego_planning)/config/move_base/costmap_common_vision.yaml"
               command="load"/>
     <rosparam if="$(arg use_laserscan)"
-              file="$(find autorace_planning)/config/costmap_common_vision_scan.yaml"
+              file="$(find wego_planning)/config/move_base/costmap_common_vision_scan.yaml"
               command="load"/>
 
-    <rosparam file="$(find autorace_planning)/config/global_costmap.yaml" command="load"/>
-    <rosparam file="$(find autorace_planning)/config/local_costmap.yaml"  command="load"/>
-    <rosparam file="$(find autorace_planning)/config/dwa_local_planner.yaml" command="load"/>
+    <rosparam file="$(find wego_planning)/config/move_base/global_costmap.yaml" command="load"/>
+    <rosparam file="$(find wego_planning)/config/move_base/local_costmap.yaml"  command="load"/>
+    <rosparam file="$(find wego_planning)/config/move_base/dwa_local_planner.yaml" command="load"/>
 
     <param name="base_local_planner" value="dwa_local_planner/DWAPlannerROS"/>
     <param name="visioncloud/sensor_frame" value="$(arg sensor_frame)"/>
@@ -27,3 +27,4 @@
   <node pkg="topic_tools" type="relay" name="relay_goal"
         args="/vision/goal_throttled /move_base_simple/goal" />
 </launch>
+

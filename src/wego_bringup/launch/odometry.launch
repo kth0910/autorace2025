@@ -1,0 +1,74 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- ========================================== -->
+  <!-- WeGO Odometry Launch File                  -->
+  <!-- ========================================== -->
+  <!-- 
+    Odometry 노드를 실행합니다.
+    시뮬레이션 모드: 더미 odometry
+    실제 모드: IMU + VESC 융합 odometry
+  -->
+
+  <!-- Arguments -->
+  <arg name="simulation" default="false" doc="시뮬레이션 모드 (더미 데이터 사용)"/>
+  <arg name="use_vesc_feedback" default="false" doc="VESC 피드백 사용 (false면 명령값 사용)"/>
+  <arg name="rate" default="50.0" doc="Odometry 발행 주기 (Hz)"/>
+
+  <!-- ========================================== -->
+  <!-- Simulation Mode: Dummy Odometry            -->
+  <!-- ========================================== -->
+  <group if="$(arg simulation)">
+    <node name="dummy_odom_node" pkg="wego_bringup" type="dummy_odom_node.py" output="screen">
+      <param name="rate" value="$(arg rate)"/>
+      <param name="frame_id" value="odom"/>
+      <param name="child_frame_id" value="base_link"/>
+      <param name="radius" value="5.0"/>
+      <param name="angular_velocity" value="0.1"/>
+    </node>
+    
+    <node pkg="tf" type="static_transform_publisher" name="map_to_odom" 
+          args="0 0 0 0 0 0 map odom 100"/>
+  </group>
+
+  <!-- ========================================== -->
+  <!-- Real Mode: IMU + VESC Odometry             -->
+  <!-- ========================================== -->
+  <group unless="$(arg simulation)">
+    <node name="real_odom_node" pkg="wego_bringup" type="real_odom_node.py" output="screen">
+      <param name="rate" value="$(arg rate)"/>
+      <param name="frame_id" value="odom"/>
+      <param name="child_frame_id" value="base_link"/>
+      
+      <!-- Vehicle parameters -->
+      <param name="wheelbase" value="0.32"/>
+      <param name="wheel_radius" value="0.05"/>
+      
+      <!-- VESC conversion parameters -->
+      <param name="erpm_to_speed_gain" value="0.00025"/>  <!-- 1/4000 -->
+      <param name="use_vesc_feedback" value="$(arg use_vesc_feedback)"/>
+      
+      <!-- IMU parameters -->
+      <param name="use_imu_orientation" value="true"/>
+      <param name="imu_angular_velocity_covariance" value="0.01"/>
+      
+      <!-- Timeout parameters -->
+      <param name="imu_timeout" value="0.5"/>
+      <param name="vesc_timeout" value="0.5"/>
+    </node>
+    
+    <!-- Static TF: map -> odom -->
+    <node pkg="tf" type="static_transform_publisher" name="map_to_odom" 
+          args="0 0 0 0 0 0 map odom 100"/>
+  </group>
+
+  <!-- ========================================== -->
+  <!-- Diagnostics (Optional)                     -->
+  <!-- ========================================== -->
+  <!-- 
+  <node name="odom_diagnostics" pkg="diagnostic_aggregator" type="aggregator_node" output="screen">
+    <rosparam command="load" file="$(find wego_bringup)/config/odom_diagnostics.yaml"/>
+  </node>
+  -->
+
+</launch>
+

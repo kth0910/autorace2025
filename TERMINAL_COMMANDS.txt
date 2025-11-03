@@ -1,0 +1,118 @@
+========================================
+복사-붙여넣기용 명령어 모음
+========================================
+
+========================================
+사전 준비 (한 번만)
+========================================
+
+cd ~/autorace2025/autorace2025
+source /opt/ros/noetic/setup.bash
+catkin_make
+source devel/setup.bash
+chmod +x src/wego_vision/scripts/*.py src/wego_planning/scripts/*.py
+sudo chmod 666 /dev/video0
+echo "source ~/autorace2025/autorace2025/devel/setup.bash" >> ~/.bashrc
+
+
+========================================
+터미널 1: roscore
+========================================
+
+roscore
+
+
+========================================
+터미널 2: 카메라
+========================================
+
+source ~/autorace2025/autorace2025/devel/setup.bash
+rosrun wego_vision simple_camera_publisher.py
+
+
+========================================
+터미널 3: 이미지 보정
+========================================
+
+source ~/autorace2025/autorace2025/devel/setup.bash
+rosrun wego_vision camera_node.py
+
+
+========================================
+터미널 4: 차선 검출
+========================================
+
+source ~/autorace2025/autorace2025/devel/setup.bash
+rosrun wego_vision lane_detection_simple.py
+
+
+========================================
+터미널 5: Odometry
+========================================
+
+source ~/autorace2025/autorace2025/devel/setup.bash
+rosrun wego_bringup dummy_odom_node.py
+
+
+========================================
+터미널 6: 경로 계획
+========================================
+
+source ~/autorace2025/autorace2025/devel/setup.bash
+rosrun wego_planning path_planner_with_lane.py
+
+
+========================================
+터미널 7: 시각화
+========================================
+
+rosrun rqt_image_view rqt_image_view /vision/lane_image
+
+
+========================================
+빠른 확인 명령어
+========================================
+
+# 노드 확인
+rosnode list
+
+# 토픽 확인
+rostopic list | grep -E "image|lane|odom|path"
+
+# 토픽 주파수
+rostopic hz /vision/lane_info
+
+# 차선 정보 확인
+rostopic echo /vision/lane_info
+
+# 경로 확인
+rostopic echo /planning/path
+
+
+========================================
+일괄 실행 (백그라운드)
+========================================
+
+source ~/autorace2025/autorace2025/devel/setup.bash
+rosrun wego_vision simple_camera_publisher.py &
+rosrun wego_vision camera_node.py &
+rosrun wego_vision lane_detection_simple.py &
+rosrun wego_bringup dummy_odom_node.py &
+rosrun wego_planning path_planner_with_lane.py &
+
+
+========================================
+종료
+========================================
+
+# 모든 노드 종료
+rosnode kill -a
+
+# roscore 종료
+Ctrl+C (터미널 1에서)
+
+
+========================================
+
+
+

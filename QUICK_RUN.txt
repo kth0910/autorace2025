@@ -1,0 +1,253 @@
+========================================
+WeGO Vision + Planning 실행 순서
+========================================
+
+사전 준비 (한 번만):
+1. cd ~/autorace2025/autorace2025
+2. source /opt/ros/noetic/setup.bash
+3. catkin_make
+4. source devel/setup.bash
+5. chmod +x src/wego_vision/scripts/*.py src/wego_planning/scripts/*.py src/wego_bringup/scripts/*.py
+6. sudo chmod 666 /dev/video0
+
+의존성 설치 (Move Base 사용 시):
+sudo apt install -y ros-noetic-move-base ros-noetic-dwa-local-planner ros-noetic-topic-tools
+
+========================================
+실행 순서 (순서 중요!)
+========================================
+
+터미널 1: roscore
+----------------------------------------
+roscore
+
+(계속 켜두기!)
+
+
+터미널 2: 카메라
+----------------------------------------
+source ~/autorace2025/autorace2025/devel/setup.bash
+rosrun wego_vision simple_camera_publisher.py
+
+확인: rostopic hz /usb_cam/image_raw
+      → 30 Hz 나와야 함
+
+
+터미널 3: 이미지 보정
+----------------------------------------
+source ~/autorace2025/autorace2025/devel/setup.bash
+rosrun wego_vision camera_node.py
+
+확인: rostopic hz /vision/image_rect
+      → 30 Hz 나와야 함
+
+
+터미널 4: 차선 검출
+----------------------------------------
+source ~/autorace2025/autorace2025/devel/setup.bash
+rosrun wego_vision lane_detection_simple.py
+
+확인: rostopic echo /vision/lane_info
+      → confidence > 0.5 나와야 함
+
+
+터미널 5: Odometry
+----------------------------------------
+
+[방법 A] 시뮬레이션 모드 (센서 없이)
+source ~/autorace2025/autorace2025/devel/setup.bash
+roslaunch wego_bringup odometry.launch simulation:=true
+
+[방법 B] 실제 센서 (VESC 명령값 사용) - 권장
+# 먼저 IMU 실행 (별도 터미널)
+roslaunch myahrs_driver myahrs_driver.launch
+
+# 그 다음 실제 odometry 실행
+source ~/autorace2025/autorace2025/devel/setup.bash
+roslaunch wego_bringup odometry.launch simulation:=false
+
+[방법 C] 실제 센서 (VESC 피드백 사용) - vesc_msgs 필요
+# 먼저 IMU + VESC 실행 (별도 터미널들)
+roslaunch myahrs_driver myahrs_driver.launch
+roslaunch vesc_driver vesc_driver_node.launch
+
+# 그 다음 실제 odometry 실행 (피드백 모드)
+source ~/autorace2025/autorace2025/devel/setup.bash
+roslaunch wego_bringup odometry.launch simulation:=false use_vesc_feedback:=true
+
+확인: rostopic hz /odom → 50 Hz
+      rostopic hz /imu/data → IMU 데이터 확인
+      rostopic echo /odom → 위치/속도 확인
+
+※ 자세한 설정은 ODOMETRY_SETUP.md 참고
+
+
+터미널 6: 경로 계획 (Planning)
+----------------------------------------
+
+[방법 A] 차선 기반 경로 계획 (간단, 권장)
+source ~/autorace2025/autorace2025/devel/setup.bash
+rosrun wego_planning path_planner_with_lane.py
+
+확인: rostopic echo /planning/path
+      → 경로 데이터 나와야 함
+
+[방법 B] Move Base 내비게이션 (고급)
+# Vision 기반 Move Base
+roslaunch wego_planning move_base/move_base_vision.launch
+
+# 목표 지점 전송
+rosrun wego_planning send_goal.py _x:=2.0 _y:=0.0
+
+확인: rostopic echo /cmd_vel
+      → 속도 명령 나와야 함
+
+
+터미널 7: 시각화 (선택사항)
+----------------------------------------
+rosrun rqt_image_view rqt_image_view /vision/lane_image
+
+또는 RViz:
+rviz
+  - Add → Image → /vision/lane_image
+  - Add → Path → /planning/path
+  - Add → Odometry → /odom
+
+
+========================================
+데이터 흐름
+========================================
+
+[센서 데이터]
+/imu/data (IMU 센서) ──────┐
+                          ├─→ /odom (터미널 5)
+/commands/motor/speed ────┘     ↓
+(VESC 모터)                     ↓
+                                ↓
+[비전 데이터]                   ↓
+/usb_cam/image_raw (터미널 2)   ↓
+    ↓                          ↓
+/vision/image_rect (터미널 3)   ↓
+    ↓                          ↓
+/vision/lane_info (터미널 4) ───┴─→ /planning/path (터미널 6)
+
+
+========================================
+필수 토픽 체크
+========================================
+
+rostopic list
+
+필수 (차선 기반 모드):
+✓ /usb_cam/image_raw
+✓ /vision/image_rect
+✓ /vision/lane_info
+✓ /odom
+✓ /planning/path
+
+필수 (Move Base 모드):
+✓ /odom
+✓ /vision/obstacles (또는 /scan)
+✓ /move_base_simple/goal
+✓ /cmd_vel
+
+디버그:
+✓ /vision/debug/roi
+✓ /vision/debug/edges
+✓ /vision/debug/color_mask
+✓ /vision/lane_image
+✓ /move_base/global_costmap/costmap
+✓ /move_base/local_costmap/costmap
+
+
+========================================
+노드 재시작 (문제 발생 시)
+========================================
+
+특정 노드만 재시작:
+
+# 차선 검출 재시작
+rosnode kill /lane_detection_simple
+rosrun wego_vision lane_detection_simple.py
+
+# 경로 계획 재시작 (차선 기반)
+rosnode kill /path_planner_with_lane
+rosrun wego_planning path_planner_with_lane.py
+
+# Move Base 재시작
+rosnode kill /move_base
+roslaunch wego_planning move_base/move_base_vision.launch
+
+
+========================================
+파라미터 조정 (차선 안 보일 때)
+========================================
+
+rosnode kill /lane_detection_simple
+
+rosrun wego_vision lane_detection_simple.py \
+  _roi_top_ratio:=0.6 \
+  _canny_low:=30 \
+  _canny_high:=100 \
+  _hough_threshold:=20 \
+  _white_lower:="[0, 0, 150]" \
+  _color_weight:=0.5
+
+
+========================================
+전체 종료
+========================================
+
+각 터미널에서 Ctrl+C
+
+또는:
+
+rosnode kill -a  (모든 노드 종료)
+Ctrl+C (roscore 종료)
+
+
+========================================
+빠른 재시작 (roscore 살려두고)
+========================================
+
+roscore만 켜두고 나머지 노드만 재시작:
+
+source ~/autorace2025/autorace2025/devel/setup.bash
+rosrun wego_vision simple_camera_publisher.py &
+rosrun wego_vision camera_node.py &
+rosrun wego_vision lane_detection_simple.py &
+rosrun wego_planning path_planner_with_lane.py &
+
+# Odometry (시뮬레이션)
+rosrun wego_bringup dummy_odom_node.py &
+
+# 또는 Odometry (실제 센서)
+# roslaunch wego_bringup odometry.launch simulation:=false &
+
+
+========================================
+문제 해결
+========================================
+
+문제: debug 토픽이 안 보임
+해결: camera_node 실행 확인
+      rostopic hz /vision/image_rect
+
+문제: planning/path가 안 나옴
+해결: lane_info confidence 확인
+      rostopic echo /vision/lane_info
+
+문제: Move Base가 목표에 도달 못함
+해결: goal tolerance 확대
+      rosparam set /move_base/DWAPlannerROS/xy_goal_tolerance 0.5
+
+문제: 로봇이 제자리에서 맴돔
+해결: path_distance_bias 증가
+      rosparam set /move_base/DWAPlannerROS/path_distance_bias 64.0
+
+문제: 새 터미널에서 패키지 못 찾음
+해결: source ~/autorace2025/autorace2025/devel/setup.bash
+
+
+========================================
+

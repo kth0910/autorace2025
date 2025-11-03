@@ -9,6 +9,7 @@
 
   <!-- RViz -->
   <node if="$(arg use_config)" pkg="rviz" type="rviz" name="rviz"
-        args="-d $(find autorace_planning)/config/planning.rviz"/>
+        args="-d $(find wego_planning)/config/planning.rviz"/>
   <node unless="$(arg use_config)" pkg="rviz" type="rviz" name="rviz"/>
 </launch>
+

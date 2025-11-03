@@ -11,3 +11,4 @@ scan:
   clearing: true
 inflation_radius: 0.5
 cost_scaling_factor: 10.0
+
