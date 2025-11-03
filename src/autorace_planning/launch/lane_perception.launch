@@ -1,0 +1,42 @@
+<launch>
+  <!-- 카메라/출력 프레임 -->
+  <arg name="image_topic"   default="/camera/image_raw"/>
+  <arg name="output_frame"  default="base_link"/>
+
+  <!-- Path/Goal 토픽 -->
+  <arg name="path_topic"    default="/vision/lane_path"/>
+  <arg name="goal_topic"    default="/vision/goal"/>
+  <arg name="debug_topic"   default="/vision/debug_image"/>
+
+  <!-- 좌표 변환 모드: scale | homography -->
+  <arg name="mode"          default="scale"/>
+
+  <!-- scale 모드 파라미터(필요에 맞게 조정) -->
+  <rosparam param="scale_params">
+    meters_per_pixel_x: 0.0025   # 1px = 2.5 mm (예시)
+    meters_per_pixel_y: 0.0040   # 1px = 4.0 mm (예시)
+    center_col: 640              # 1280x720 기준 중앙
+  </rosparam>
+
+  <!-- homography 모드(3x3) - 필요 시 mode:=homography로 실행 -->
+  <rosparam param="H">[1,0,0, 0,1,0, 0,0,1]</rosparam>
+
+  <!-- 룩어헤드 Goal -->
+  <arg name="publish_goal" default="true"/>
+  <arg name="lookahead_m"  default="1.5"/>
+  <arg name="goal_rate_hz" default="0.5"/>
+
+  <node pkg="autorace_planning" type="lane_detector_node.py" name="lane_detector" output="screen">
+    <param name="image_topic"   value="$(arg image_topic)"/>
+    <param name="output_frame"  value="$(arg output_frame)"/>
+    <param name="path_topic"    value="$(arg path_topic)"/>
+    <param name="goal_topic"    value="$(arg goal_topic)"/>
+    <param name="debug_topic"   value="$(arg debug_topic)"/>
+    <param name="mode"          value="$(arg mode)"/>
+    <rosparam param="scale_params" subst_value="true">$(param scale_params)</rosparam>
+    <param name="H"             value="$(param H)"/>
+    <param name="publish_goal"  value="$(arg publish_goal)"/>
+    <param name="lookahead_m"   value="$(arg lookahead_m)"/>
+    <param name="goal_rate_hz"  value="$(arg goal_rate_hz)"/>
+  </node>
+</launch>
