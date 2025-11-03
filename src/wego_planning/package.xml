@@ -16,12 +16,23 @@
   <depend>std_msgs</depend>
   <depend>geometry_msgs</depend>
   <depend>nav_msgs</depend>
+  <depend>sensor_msgs</depend>
   <depend>tf</depend>
   <depend>tf2_ros</depend>
+  <depend>tf2_geometry_msgs</depend>
+
+  <!-- move_base (선택적) -->
+  <depend>move_base</depend>
+  <depend>move_base_msgs</depend>
+  
+  <!-- Vision (선택적) -->
+  <depend>cv_bridge</depend>
+  <depend>image_transport</depend>
 
   <!-- 추가 의존성 -->
   <exec_depend>python3-numpy</exec_depend>
   <exec_depend>python3-scipy</exec_depend>
+  <exec_depend>topic_tools</exec_depend>
 
   <export>
   </export>

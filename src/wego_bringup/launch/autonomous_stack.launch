@@ -12,6 +12,16 @@
   <arg name="rviz" default="false" doc="RViz 시각화 실행 여부"/>
   <arg name="use_camera" default="true" doc="USB 카메라 실행 여부"/>
   <arg name="simulation" default="false" doc="시뮬레이션 모드 (더미 데이터 사용)"/>
+  <arg name="use_vesc_feedback" default="false" doc="VESC 피드백 사용 (false면 명령값 사용)"/>
+
+  <!-- ========================================== -->
+  <!-- 0. ODOMETRY (센서 융합)                    -->
+  <!-- ========================================== -->
+  <include file="$(find wego_bringup)/launch/odometry.launch">
+    <arg name="simulation" value="$(arg simulation)"/>
+    <arg name="use_vesc_feedback" value="$(arg use_vesc_feedback)"/>
+    <arg name="rate" value="50.0"/>
+  </include>
 
   <!-- ========================================== -->
   <!-- 1. VISION Pipeline                         -->
@@ -51,18 +61,15 @@
   </group>
 
   <!-- ========================================== -->
-  <!-- Simulation Mode (Optional)                 -->
+  <!-- Static TF: base_link -> sensors            -->
   <!-- ========================================== -->
-  <group if="$(arg simulation)">
-    <!-- Dummy Odometry Publisher -->
-    <node name="dummy_odom" pkg="wego_bringup" type="dummy_odom_node.py" output="screen"/>
-    
-    <!-- Static TF: map -> odom -> base_link -->
-    <node pkg="tf" type="static_transform_publisher" name="map_to_odom" 
-          args="0 0 0 0 0 0 map odom 100"/>
-    <node pkg="tf" type="static_transform_publisher" name="odom_to_base_link" 
-          args="0 0 0 0 0 0 odom base_link 100"/>
-  </group>
+  <!-- base_link를 중심으로 센서들의 위치 정의 -->
+  <node pkg="tf" type="static_transform_publisher" name="base_link_to_camera" 
+        args="0.15 0 0.1 0 0 0 base_link camera_link 100"/>
+  <node pkg="tf" type="static_transform_publisher" name="base_link_to_imu" 
+        args="0 0 0.05 0 0 0 base_link imu_link 100"/>
+  <node pkg="tf" type="static_transform_publisher" name="base_link_to_laser" 
+        args="0.1 0 0.15 0 0 0 base_link laser_link 100"/>
 
   <!-- ========================================== -->
   <!-- Logging                                    -->

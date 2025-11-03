@@ -90,3 +90,4 @@ if __name__ == '__main__':
     except rospy.ROSInterruptException:
         rospy.loginfo("[Simple Camera] 종료")
 
+

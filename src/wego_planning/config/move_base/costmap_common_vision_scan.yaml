@@ -9,3 +9,4 @@ visionscan:
 footprint: [[-0.18, -0.14], [-0.18, 0.14], [0.18, 0.14], [0.18, -0.14]]
 inflation_radius: 0.5
 cost_scaling_factor: 10.0
+

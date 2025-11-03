@@ -12,8 +12,14 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   geometry_msgs
   nav_msgs
+  sensor_msgs
   tf
   tf2_ros
+  tf2_geometry_msgs
+  move_base
+  move_base_msgs
+  cv_bridge
+  image_transport
 )
 
 ###################################
@@ -24,8 +30,12 @@ catkin_package(
     std_msgs
     geometry_msgs
     nav_msgs
+    sensor_msgs
     tf
     tf2_ros
+    tf2_geometry_msgs
+    move_base
+    move_base_msgs
 )
 
 ###########
@@ -45,6 +55,8 @@ include_directories(
 catkin_install_python(PROGRAMS
   scripts/path_planner_node.py
   scripts/local_planner_node.py
+  scripts/path_planner_with_lane.py
+  scripts/send_goal.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
