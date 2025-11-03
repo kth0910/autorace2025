@@ -10,8 +10,16 @@ WeGO Vision + Planning 실행 순서
 5. chmod +x src/wego_vision/scripts/*.py src/wego_planning/scripts/*.py src/wego_bringup/scripts/*.py
 6. sudo chmod 666 /dev/video0
 
-의존성 설치 (Move Base 사용 시):
+의존성 설치 (선택사항):
+# Move Base 사용 시
 sudo apt install -y ros-noetic-move-base ros-noetic-dwa-local-planner ros-noetic-topic-tools
+
+# IMU 드라이버 (실제 센서 사용 시)
+# sudo apt install ros-noetic-myahrs-driver
+# 또는 git clone https://github.com/withrobot/myahrs_driver.git
+
+# VESC 드라이버 (실제 모터 제어 시)
+# git clone https://github.com/mit-racecar/vesc.git
 
 ========================================
 실행 순서 (순서 중요!)
@@ -54,32 +62,154 @@ rosrun wego_vision lane_detection_simple.py
 터미널 5: Odometry
 ----------------------------------------
 
-[방법 A] 시뮬레이션 모드 (센서 없이)
+[방법 A] 시뮬레이션 모드 (센서 없이) ⭐ 권장 (개발/테스트)
 source ~/autorace2025/autorace2025/devel/setup.bash
 roslaunch wego_bringup odometry.launch simulation:=true
 
-[방법 B] 실제 센서 (VESC 명령값 사용) - 권장
-# 먼저 IMU 실행 (별도 터미널)
-roslaunch myahrs_driver myahrs_driver.launch
-
-# 그 다음 실제 odometry 실행
-source ~/autorace2025/autorace2025/devel/setup.bash
-roslaunch wego_bringup odometry.launch simulation:=false
-
-[방법 C] 실제 센서 (VESC 피드백 사용) - vesc_msgs 필요
-# 먼저 IMU + VESC 실행 (별도 터미널들)
-roslaunch myahrs_driver myahrs_driver.launch
-roslaunch vesc_driver vesc_driver_node.launch
-
-# 그 다음 실제 odometry 실행 (피드백 모드)
-source ~/autorace2025/autorace2025/devel/setup.bash
-roslaunch wego_bringup odometry.launch simulation:=false use_vesc_feedback:=true
-
 확인: rostopic hz /odom → 50 Hz
-      rostopic hz /imu/data → IMU 데이터 확인
       rostopic echo /odom → 위치/속도 확인
 
+---
+
+[방법 B] 실제 센서 (VESC 명령값 사용)
+※ IMU 센서가 필요합니다!
+
+■ IMU 드라이버 설치 (처음 한 번만)
+
+  ┌──────────────────────────────────────────┐
+  │ ⭐ 방법 1: 일반 IMU 드라이버 (권장)    │
+  └──────────────────────────────────────────┘
+  
+  대부분의 IMU 센서를 지원합니다!
+  
+  sudo apt update
+  sudo apt install -y ros-noetic-imu-tools
+  
+  이 패키지는 다음을 지원합니다:
+  - MPU6050, MPU9250
+  - BNO055
+  - ADIS16448
+  - 기타 대부분의 I2C/SPI IMU
+  
+  ┌──────────────────────────────────────────┐
+  │ 방법 2: 특정 센서별 드라이버            │
+  └──────────────────────────────────────────┘
+  
+  A. Raspberry Pi Sense HAT
+     sudo apt install ros-noetic-rtimulib-ros
+  
+  B. Xsens IMU
+     sudo apt install ros-noetic-xsens-driver
+  
+  C. Phidgets IMU
+     sudo apt install ros-noetic-phidgets-imu
+  
+  D. Arduino + IMU 센서
+     sudo apt install ros-noetic-rosserial-arduino
+     sudo apt install ros-noetic-rosserial-python
+  
+  ┌──────────────────────────────────────────┐
+  │ 방법 3: USB-시리얼 IMU (일반적)         │
+  └──────────────────────────────────────────┘
+  
+  USB로 연결되는 대부분의 IMU:
+  
+  sudo apt install ros-noetic-serial
+  sudo apt install ros-noetic-rosserial
+  
+  ┌──────────────────────────────────────────┐
+  │ 방법 4: 직접 IMU 데이터 발행            │
+  └──────────────────────────────────────────┘
+  
+  센서가 /dev/ttyUSB0 또는 /dev/ttyACM0에 연결되어 있다면:
+  
+  # 간단한 IMU 퍼블리셔 실행 (우리가 만든 것)
+  rosrun wego_bringup simple_imu_publisher.py
+  
+  (이 파일은 아래에 만들어 드립니다!)
+
+■ 실행 (별도 터미널에서)
+  
+  # Terminal 5-1: IMU 드라이버 (설치한 방법에 따라)
+  
+  # 방법 1을 선택했다면:
+  rosrun imu_tools imu_filter_node
+  
+  # 방법 4를 선택했다면 (간단한 IMU):
+  source ~/autorace2025/autorace2025/devel/setup.bash
+  rosrun wego_bringup simple_imu_publisher.py _port:=/dev/ttyUSB0
+  
+  # Terminal 5-2: Real Odometry
+  source ~/autorace2025/autorace2025/devel/setup.bash
+  roslaunch wego_bringup odometry.launch simulation:=false
+
+■ 확인
+  rostopic hz /imu/data   → IMU 데이터
+  rostopic echo /imu/data → angular_velocity.z 값 확인
+  rostopic hz /odom       → 50 Hz
+
+---
+
+■ IMU가 없거나 설치가 안 되면?
+  → 방법 A (시뮬레이션 모드) 사용! 센서 없이도 완벽하게 작동합니다!
+  roslaunch wego_bringup odometry.launch simulation:=true
+
+---
+
+[방법 C] 실제 센서 (VESC 피드백 사용)
+※ IMU + VESC 드라이버 필요
+
+■ VESC 드라이버 설치 (처음 한 번만)
+
+  방법 1: GitHub에서 다운로드 (계정 불필요) ⭐
+  
+  cd ~/catkin_ws/src
+  git clone https://github.com/mit-racecar/vesc.git
+  cd ~/catkin_ws
+  rosdep install --from-paths src --ignore-src -r -y
+  catkin_make
+  source devel/setup.bash
+  
+  ※ 만약 GitHub 계정 요구하면:
+    방법 2 사용 (수동 다운로드)
+  
+  방법 2: 수동 다운로드
+  
+  1. 웹 브라우저로 https://github.com/mit-racecar/vesc 접속
+  2. 녹색 "Code" 버튼 → "Download ZIP" 클릭
+  3. 다운로드한 파일 압축 풀기
+  4. 압축 푼 폴더를 ~/catkin_ws/src/로 복사
+  5. cd ~/catkin_ws && catkin_make
+
+■ 실행 (별도 터미널들)
+  # Terminal 5-1: IMU 드라이버
+  roslaunch myahrs_driver myahrs_driver.launch
+  
+  # Terminal 5-2: VESC 드라이버
+  roslaunch vesc_driver vesc_driver_node.launch
+  
+  # Terminal 5-3: Real Odometry (피드백 모드)
+  source ~/autorace2025/autorace2025/devel/setup.bash
+  roslaunch wego_bringup odometry.launch simulation:=false use_vesc_feedback:=true
+
+■ 확인
+  rostopic hz /imu/data     → IMU
+  rostopic hz /sensors/core → VESC 피드백
+  rostopic hz /odom         → 50 Hz
+
+---
+
+========================================
+⭐ 중요: 센서가 없거나 설치가 안 되나요?
+========================================
+
+걱정 마세요! 방법 A (시뮬레이션 모드)를 사용하면
+IMU, VESC 같은 센서 없이도 완벽하게 작동합니다!
+
+roslaunch wego_bringup odometry.launch simulation:=true
+
 ※ 자세한 설정은 ODOMETRY_SETUP.md 참고
+※ Git 문제 해결은 아래 "문제 해결" 섹션 참고
 
 
 터미널 6: 경로 계획 (Planning)
@@ -247,6 +377,23 @@ rosrun wego_bringup dummy_odom_node.py &
 
 문제: 새 터미널에서 패키지 못 찾음
 해결: source ~/autorace2025/autorace2025/devel/setup.bash
+
+문제: git clone 시 GitHub 계정 요구함
+해결 1: 그냥 Enter 여러번 눌러서 취소 → 수동 다운로드 사용
+해결 2: Git 설정
+        git config --global credential.helper ""
+        다시 git clone 시도
+해결 3: 웹 브라우저에서 ZIP 다운로드 (위 방법 2 참고)
+해결 4: 센서 없이 시뮬레이션 모드 사용 (방법 A)
+
+문제: apt install 시 "unable to locate package"
+해결: 공식 저장소에 없는 패키지입니다
+      → GitHub에서 수동 다운로드 (위 방법 1 또는 2)
+      → 또는 시뮬레이션 모드 사용
+
+문제: IMU/VESC 드라이버 설치가 너무 복잡함
+해결: 시뮬레이션 모드 사용! 센서 없이도 모든 기능 테스트 가능
+      roslaunch wego_bringup odometry.launch simulation:=true
 
 
 ========================================

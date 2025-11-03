@@ -17,6 +17,7 @@ catkin_package()
 catkin_install_python(PROGRAMS
   scripts/dummy_odom_node.py
   scripts/real_odom_node.py
+  scripts/simple_imu_publisher.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
