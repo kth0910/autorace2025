@@ -208,7 +208,7 @@ class MainLoop:
         rospy.loginfo("MISSION: Child Sign")
         # child sign detected, waiting sign to disappear.
         if self.sign_data == 100:
-            self.angle_msg.data = (self.slide_x_location - 280) * 0.0035 + 0.5 + 0.07# 조향각 계산
+            self.angle_msg.data = -(self.slide_x_location - 280) * 0.0035 + 0.5 + 0.07# 조향각 계산
             self.angle_child_before = self.angle_msg.data
             self.speed_msg.data = 2000 # defalut speed
         # sign disappered, drive slow
@@ -234,7 +234,7 @@ class MainLoop:
                     self.is_child_detected = True
                     self.slow_flag = True
                 elif t2 - self.slow_t1 <= 15:
-                    self.angle_msg.data = (self.slide_x_location - 280) * 0.003 + 0.5 +0.07
+                    self.angle_msg.data = -(self.slide_x_location - 280) * 0.003 + 0.5 +0.07
                     self.speed_msg.data = 1000
                 else:
                     self.stop_flag = False
@@ -242,7 +242,7 @@ class MainLoop:
                     self.is_child_detected = False
                     
         self.angle_ema.data = 0.8 * self.angle_ema.data + 0.2 * self.angle_msg.data
-        self.webot_speed_pub.publish(self.angle_ema)
+        self.webot_angle_pub.publish(self.angle_ema)
         self.webot_speed_pub.publish(self.speed_msg)
     
     def rubberconeDrive(self):
@@ -302,11 +302,13 @@ class MainLoop:
     def defaultDrive(self):
         rospy.loginfo("MISSION: Default Driving")
         self.speed_msg.data = 2000 # defalut speed
-        self.angle_msg.data = (self.slide_x_location - 280) * 0.003 + 0.57 # 조향각 계산
+        self.angle_msg.data = -(self.slide_x_location - 280) * 0.003 + 0.57 # 조향각 계산
         
         # 조향범위 제한
         if self.angle_msg.data < 0.1:
             self.angle_msg.data = 0.1
+        if self.angle_msg.data > 0.95:
+            self.angle_msg.data = 0.95
 
 
     def mainAlgorithm(self):
