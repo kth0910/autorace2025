@@ -17,7 +17,6 @@
     <arg name="serial_baudrate" value="$(arg rplidar_baud)"/>
   </include>
 
-  <!-- obstacle_detector: publishes /raw_obstacles consumed by detect_obstacles.py -->
-  <include file="$(find obstacle_detector)/launch/nodes.launch"/>
+  <!-- obstacle_detector 제거: detect_obstacles.py가 /scan을 직접 처리 -->
     
 </launch>
