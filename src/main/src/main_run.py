@@ -8,7 +8,6 @@ import statistics
 
 from std_msgs.msg import Int32, String, Float32, Float64
 from sensor_msgs.msg import Image
-from obstacle_detector.msg import Obstacles
 
 from cv_bridge import CvBridge
 import cv2
