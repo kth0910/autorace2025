@@ -1,6 +1,6 @@
 <launch>
   <arg name="rplidar_port" default="/dev/ttyUSB0"/>
-  <arg name="rplidar_baud" default="115200"/>
+  <arg name="rplidar_baud" default="256000"/>
 
   <node name="main_class_run" type="main_run.py" pkg="main" output="screen"/>
   <node name="child_sign" type="child_sign.py" pkg="main" output="screen"/>
@@ -12,7 +12,7 @@
   <node pkg="image_proc" type="image_proc" name="image_proc" ns="/usb_cam" output="screen"/>
   <include file="$(find aruco_detect)/launch/aruco_detect.launch" />
 
-  <include file="$(find rplidar_ros)/launch/rplidar.launch">
+  <include file="$(find rplidar_ros)/launch/rplidar_s1.launch">
     <arg name="serial_port" value="$(arg rplidar_port)"/>
     <arg name="serial_baudrate" value="$(arg rplidar_baud)"/>
   </include>
