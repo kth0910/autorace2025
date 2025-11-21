@@ -1,0 +1,23 @@
+<launch>
+    <!-- 카메라 노드 -->
+    <include file="$(find usb_cam)/launch/usb_cam-test.launch"/>
+    
+    <!-- 이미지 보정 노드 (image_rect_color 토픽 생성) -->
+    <node name="image_proc" pkg="image_proc" type="image_proc" ns="usb_cam" output="screen"/>
+    
+    <!-- 차선 감지 노드 -->
+    <node name="lane_detection_node" type="lane_detection_node.py" pkg="main" output="screen"/>
+    
+    <!-- 시각화 (선택사항) -->
+    <node name="lane_image_view" pkg="image_view" type="image_view" output="screen">
+        <remap from="image" to="/lane_detection/image"/>
+        <param name="autosize" value="true"/>
+    </node>
+    
+    <rosparam>
+        /lane_detection_node:
+            # 차선 감지 파라미터 (필요시 추가)
+    </rosparam>
+</launch>
+
+
